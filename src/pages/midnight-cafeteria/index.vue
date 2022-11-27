@@ -33,8 +33,8 @@ export default {
       right: 0, // 棋盘右边坐标
       top: 100, // 棋盘上边坐标
       bottom: 0, // 棋盘下边坐标
-      stageWidth: 300, // 棋盘格长宽相等
-      blockWidth: 30, // 棋子长宽相等
+      stageWidth: 600, // 棋盘格长宽相等
+      blockWidth: 100, // 棋子长宽相等
       layer: 5, // 棋盘层数
       blocks: [], // 棋盘状态实时更新
       sprites: [], // 块图
@@ -67,6 +67,7 @@ export default {
       // 初始化棋盘
       this.left = Math.floor((window.innerWidth - this.stageWidth) / 2);
       this.right = this.left + this.stageWidth;
+      this.top = window.innerHeight - this.stageWidth - 110;
       this.bottom = this.top + this.stageWidth;
       this.resetGame();
 
@@ -83,7 +84,7 @@ export default {
 
       // 计算每种图案的块数
       this.divideTotalBlocks(
-        this.random(3 * this.images.length, 200, 3 * this.images.length), // 保证是3和num的倍数，记录总块数
+        this.random(3 * this.images.length, 60, 3 * this.images.length), // 保证是3和num的倍数，记录总块数
         this.images.length // 图案种类
       );
 
@@ -144,13 +145,10 @@ export default {
      */
     setBackground(app, bgImageSrc) {
       app.renderer.backgroundColor = 0xe8e8e8; // 设置canvas背景颜色
-      const bgImage = PIXI.Texture.from(bg);
-      const bgSprite = new PIXI.TilingSprite(
-        bgImage,
-        app.screen.width,
-        app.screen.height
-      );
+      const bgSprite = PIXI.Sprite.from(bg, {});
       app.stage.addChild(bgSprite);
+      bgSprite.width = window.innerWidth;
+      bgSprite.height = window.innerHeight;
     },
 
     /**
@@ -376,7 +374,7 @@ export default {
      */
     renderSlotWrapper(app) {
       const left = (window.innerWidth - this.blockWidth * 7) / 2;
-      const top = window.innerHeight - 150;
+      const top = window.innerHeight - 110;
       // 绘制块槽
       let rectangle = new PIXI.Graphics();
       rectangle.lineStyle(2, 0xf5deb3, 1);
@@ -390,7 +388,7 @@ export default {
      */
     renderSlot() {
       const left = (window.innerWidth - this.blockWidth * 7) / 2;
-      const top = window.innerHeight - 150;
+      const top = window.innerHeight - 110;
       // 绘制块
       this.slot.forEach((block, index) => {
         block.target.x = left + index * this.blockWidth;
