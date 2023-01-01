@@ -194,7 +194,7 @@ export default {
     /**
      * 画棋盘辅助线(开发用途)
      */
-    genAuxiliaryLsines(app, rowNum, colNum) {
+    genAuxiliaryLines(app, rowNum, colNum) {
       const width = this.blockWidth;
       const height = this.blockWidth;
       for (let r = 0; r < rowNum + 1; r++) {
@@ -235,7 +235,7 @@ export default {
       }
 
       // 画辅助棋盘线
-      // this.genAuxiliaryLsines(app, rowNum, colNum);
+      // this.genAuxiliaryLines(app, rowNum, colNum);
       // 画辅助棋盘线
 
       let i = 0;
