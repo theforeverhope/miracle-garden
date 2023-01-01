@@ -72,7 +72,7 @@ export default {
       this.resetGame();
 
       // 绘制块槽
-      this.renderSlotWrapper(app);
+      // this.renderSlotWrapper(app);
 
       // 将创建好的canvas添加到元素当中去
       document.getElementById('pixi2').appendChild(app.view);
@@ -235,7 +235,7 @@ export default {
       }
 
       // 画辅助棋盘线
-      this.genAuxiliaryLsines(app, rowNum, colNum);
+      // this.genAuxiliaryLsines(app, rowNum, colNum);
       // 画辅助棋盘线
 
       let i = 0;
@@ -375,10 +375,11 @@ export default {
     renderSlotWrapper(app) {
       const left = (window.innerWidth - this.blockWidth * 7) / 2;
       const top = window.innerHeight - 110;
-      // 绘制块槽
+      // 绘制快槽边框
       let rectangle = new PIXI.Graphics();
       rectangle.lineStyle(2, 0xf5deb3, 1);
       rectangle.drawRect(left, top, this.blockWidth * 7, this.blockWidth);
+      
       app.stage.addChild(rectangle);
     },
 
