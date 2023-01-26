@@ -7,8 +7,16 @@ const routers = [
   },
   {
     path: '/cafeteria',
-    component: () => import('./pages/midnight-cafeteria/index')
-  }
+    component: () => import('./pages/cafeteria/index')
+  },
+  {
+    path: '/fruit',
+    component: () => import('./pages/fruit/index')
+  },
+  // {
+  //   path: '/watermelon',
+  //   component: () => import('./pages/watermelon/index')
+  // },
 ];
 
 const router = createRouter({
