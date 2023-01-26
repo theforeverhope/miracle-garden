@@ -272,7 +272,7 @@ export default {
 
     gameProgressChecking(body){
       Matter.Events.on(body, 'sleepStart', (event) => {
-        if (!event.source.isStatic && event.source.position.y <= 1200) {
+        if (!event.source.isStatic && event.source.position.y <= 300) {
           // 游戏失败
           this.status = 0;
         }
