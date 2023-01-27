@@ -1,5 +1,6 @@
 <template lang="html">
   <div>
+    <div id="pixi2"></div>
     <canvas id="canvas"></canvas>
     <div class="game-notice" v-if="status !== -1">
       <div class="game-notice-content">
@@ -25,9 +26,13 @@ export default {
       engine: null, // Matter.Engine - 游戏引擎
       world: null, // Matter.World - 物理系统
       render: null, // Matter.Render - 渲染引擎
+      mouseconstraint: null, // Matter.Event - 鼠标事件劫持
+
       status: -1, // 游戏状态 -1: 进行中, 0: 失败, 1: 胜利
       curFruit: null, // 当前可交互的水果
-      
+      groundHeight: 100, // 地面高度
+      psdWidth: 750, // 标准屏幕宽度
+      canvasHeight: window.innerHeight * 750 / window.innerWidth, // 用标准屏幕宽度换算canvas高度
       fruits: [ 
         {
           image: require('../../assets/watermelon/1.png'),
@@ -85,21 +90,12 @@ export default {
           mess: 8,
         },
       ],
-      groundHeight: 100, // 地面高度 20 + 80
-      psdWidth: 750,
-      canvasHeight: window.innerHeight * 750 / window.innerWidth,
-      mouseconstraint: null, // 鼠标事件劫持
     };
   },
 
   mounted() {
     // 初始化游戏
     this.initGame();
-    // 测试水果半径
-    // this.curFruit = this.createFruit(2, 150, 100);
-    // this.curFruit = this.createFruit(3, 150, 200);
-    // this.curFruit = this.createFruit(4, 150, 300);
-    // this.curFruit = this.createFruit(5, 150, 400);
   },
 
   methods: {
@@ -108,10 +104,9 @@ export default {
      */
     initGame() {
       this.canvas = document.getElementById('canvas');
+      
       // 初始化物理系统
-      this.engine = Matter.Engine.create({
-        enableSleeping: true
-      });
+      this.engine = Matter.Engine.create({});
       this.world = this.engine.world;
       this.world.bounds = { min: { x: 0, y: 0 }, max: { x: this.psdWidth, y: this.canvasHeight } };
       this.render = Matter.Render.create({
@@ -125,16 +120,16 @@ export default {
           showSleeping: false,
         },
       });
-
       this.mouseconstraint = Matter.MouseConstraint.create(this.engine);
-
       Matter.Engine.run(this.engine);
 
       this.resetGame();
     },
 
+    /**
+     * 重置游戏环境
+     */
     resetGame() {
-      console.log("resetGame")
       this.clearGame();
       const ground = Matter.Bodies.rectangle(
         this.psdWidth / 2, 
@@ -171,14 +166,15 @@ export default {
       })
 
       Matter.Events.on(this.mouseconstraint, "mouseup", (e)=>{
-        console.log("mouseup")
-          if(!this.curFruit || this.status !== -1) {
+          if (this.status !== -1) {
             this.resetGame();
+            return;
+          }
+          if(!this.curFruit) {
             return;
           };
           const x = e.mouse.absolute.x * this.psdWidth / window.innerWidth;
           this.updateFruit(x);
-          Matter.Sleeping.set(this.curFruit, false);
           Matter.Body.setStatic(this.curFruit, false);
           this.curFruit = null;
           setTimeout(()=>{
@@ -190,12 +186,16 @@ export default {
       Matter.Events.on(this.engine, "collisionActive", e => this.collisionEvent(e));
     },
 
+    /**
+     * 碰撞事件
+     */
     collisionEvent(e){
+        if (this.status !== -1) return;
         const { pairs } = e;
-        Matter.Sleeping.afterCollisions(pairs);
         for(let i = 0; i < pairs.length; i++ ){
             const { bodyA, bodyB } = pairs[i];
-            // console.log("bodyA.fruitType === ", bodyA.fruitType, bodyB.fruitType)
+            this.gameProgressChecking(bodyA);
+            this.gameProgressChecking(bodyB);
             if(bodyA?.fruitType >= 0 && bodyA.fruitType === bodyB.fruitType){
               const type = bodyA.fruitType + 1;
               if (type >= this.fruits.length) {
@@ -230,6 +230,9 @@ export default {
         }
     },
 
+    /**
+     * 水果下落前可水平移动位置
+     */
     updateFruit(x) {
       const radius = this.curFruit.circleRadius;
       Matter.Body.setPosition(this.curFruit, {
@@ -264,29 +267,31 @@ export default {
       );
 
       fruit.fruitType = fruitNum; // 水果类型
-
       Matter.World.add(this.world, fruit);
-      this.gameProgressChecking(fruit);
       return fruit;
     },
 
+    /**
+     * 游戏状态检测
+     */
     gameProgressChecking(body){
-      Matter.Events.on(body, 'sleepStart', (event) => {
-        if (!event.source.isStatic && event.source.position.y <= 300) {
-          // 游戏失败
-          this.status = 0;
-        }
-      })
+      const minY = 300;
+      if (!body.isStatic && body.position.y <= minY) {
+        // 游戏失败
+        this.status = 0;
+      }
     },
 
+    /**
+     * 清空游戏环境
+     */
     clearGame() {
-      console.log("clearGame")
       this.curFruit = null;
-      // 清除整个游戏引擎
+      // 由于还要重新设置游戏面板，所以engine不需要清除
       this.world && Matter.World.clear(this.world);
       this.render && Matter.Render.stop(this.render);
       this.mouseconstraint && Matter.Events.off(this.mouseconstraint)
-    }
+    },
   }
 }
 </script>
