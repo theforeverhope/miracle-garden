@@ -30,6 +30,8 @@ export default {
       runner: null, // Matter.Runner - 物理系统运行循环
       // render: null, // Matter.Render - 渲染引擎
       mouseconstraint: null, // Matter.Event - 鼠标事件劫持
+      dust: null, // Dust 例子效果库
+      particleContainer: null,
 
       count: 1000, // 1s
       lastTime: null,
@@ -41,54 +43,77 @@ export default {
       groundHeight: 100, // 地面高度
       psdWidth: 750, // 标准屏幕宽度
       canvasHeight: window.innerHeight * 750 / window.innerWidth, // 用标准屏幕宽度换算canvas高度
+      
+      collideMusic: new Audio(require('../../assets/watermelon/collide.mp3')),
+      combineMusic: new Audio(require('../../assets/watermelon/combine.mp3')),
       fruits: [ 
         {
           image: require('../../assets/watermelon/1.png'),
+          fragment: require('../../assets/watermelon/fragment1.png'),
+          bom: require('../../assets/watermelon/bombing1.png'),
           radius: 52/2,
           mess: 1,
         },
         {
           image: require('../../assets/watermelon/2.png'),
+          fragment: require('../../assets/watermelon/fragment2.png'),
+          bom: require('../../assets/watermelon/bombing2.png'),
           radius: 80/2,
           mess: 2,
         },
         {
           image: require('../../assets/watermelon/3.png'),
+          fragment: require('../../assets/watermelon/fragment3.png'),
+          bom: require('../../assets/watermelon/bombing3.png'),
           radius: 108/2,
           mess: 3,
         },
         {
           image: require('../../assets/watermelon/4.png'),
+          fragment: require('../../assets/watermelon/fragment4.png'),
+          bom: require('../../assets/watermelon/bombing4.png'),
           radius: 118/2,
           mess: 3
         },
         {
           image: require('../../assets/watermelon/5.png'),
+          fragment: require('../../assets/watermelon/fragment5.png'),
+          bom: require('../../assets/watermelon/bombing5.png'),
           radius: 152/2,
           mess: 4,
         },
         {
           image: require('../../assets/watermelon/6.png'),
+          fragment: require('../../assets/watermelon/fragment6.png'),
+          bom: require('../../assets/watermelon/bombing6.png'),
           radius: 184/2,
           mess: 4,
         },
         {
           image: require('../../assets/watermelon/7.png'),
+          fragment: require('../../assets/watermelon/fragment7.png'),
+          bom: require('../../assets/watermelon/bombing7.png'),
           radius: 194/2,
           mess:4,
         },
         {
           image: require('../../assets/watermelon/8.png'),
+          fragment: require('../../assets/watermelon/fragment8.png'),
+          bom: require('../../assets/watermelon/bombing8.png'),
           radius: 258/2,
           mess: 5,
         },
         {
           image: require('../../assets/watermelon/9.png'),
+          fragment: require('../../assets/watermelon/fragment9.png'),
+          bom: require('../../assets/watermelon/bombing9.png'),
           radius: 308/2,
           mess: 6,
         },
         {
           image: require('../../assets/watermelon/10.png'),
+          fragment: require('../../assets/watermelon/fragment10.png'),
+          bom: require('../../assets/watermelon/bombing10.png'),
           radius: 310/2,
           mess: 7,
         },
@@ -109,6 +134,9 @@ export default {
   },
 
   methods: {
+    /**
+     * 游戏循环
+     */
     gameLoop() {
       // 更新列表中每个水果的位置
       for(let i = 0; i < this.fruitsOnScreen.length; i++) {
@@ -117,6 +145,9 @@ export default {
         fruit.pixiSprite.y = fruit.position.y;
       }
       
+      // 更新例子粒子系统
+      this.dust.update();
+
       // 每帧时间差
       let now = Date.now();
       let diff = now - this.lastTime;
@@ -130,6 +161,10 @@ export default {
      * 初始化游戏物理世界
      */
     initGame() {
+      PIXI.particles = {
+        ParticleContainer: PIXI.ParticleContainer
+      }
+      this.dust = new Dust(PIXI);
       this.app = new PIXI.Application({
         width: this.psdWidth, // default: 800 宽度
         height: this.canvasHeight, // default: 600 高度
@@ -141,6 +176,13 @@ export default {
       this.setBackground(this.app);
       // 将创建好的canvas添加到元素当中去
       document.getElementById('canvas').appendChild(this.app.view);
+
+      // 初始化粒子系统
+      this.particleContainer = new PIXI.ParticleContainer(
+        1500,
+        { alpha: true, scale: true, rotation: true, uvs: true }
+      );
+      this.app.stage.addChild(this.particleContainer);
 
       // 初始化物理系统
       this.engine = Matter.Engine.create({});
@@ -245,7 +287,6 @@ export default {
       });
 
       Matter.Events.on(this.engine, "collisionStart", e => this.collisionEvent(e));
-      Matter.Events.on(this.engine, "collisionActive", e => this.collisionEvent(e));
     },
 
     /**
@@ -254,6 +295,7 @@ export default {
     collisionEvent(e){
       if (this.status !== -1) return;
       const { pairs } = e;
+
       for(let i = 0; i < pairs.length; i++ ){
         const { bodyA, bodyB } = pairs[i];
         this.gameProgressChecking(bodyA);
@@ -279,19 +321,31 @@ export default {
           }
 
           const { position: { x: targetX, y: targetY } } = target;
+          // 爆炸例子效果
+          this.dust.create(
+            targetX,   // x start position
+            targetY,   // y start position
+            () => new PIXI.Sprite.from(this.fruits[targetType].fragment), // Sprite function
+            this.particleContainer,  // Container for particles
+            15,                      // Number of particles
+            0.05,                     // Gravity
+            false,                   // Random spacing
+            0, 6.28,              // Min/max angle
+            this.fruits[targetType].radius, this.fruits[targetType].radius + 30,    // Min/max size
+            1, 2,                    // Min/max speed
+          );
+
           const radius = this.fruits[type].radius;
           const targetRadius = this.fruits[targetType].radius;
           const x = targetX;
           const y = targetY - (radius - targetRadius);
-          const newFruit = this.createFruit(type, x, y);
-
+          this.createBom(targetType, x, y);
+          
           this.fruitsOnScreen = this.fruitsOnScreen.filter(f => f.fruitId !== bodyA.fruitId && f.fruitId !== bodyB.fruitId);
           this.app.stage.removeChild(bodyA.pixiSprite);
           this.app.stage.removeChild(bodyB.pixiSprite);
           Matter.World.remove(this.world, bodyA);
           Matter.World.remove(this.world, bodyB);
-
-          this.gameProgressChecking(newFruit);
         }
       }
     },
@@ -309,6 +363,24 @@ export default {
       });
       this.curFruit.pixiSprite.x = targetX;
       this.curFruit.pixiSprite.y = targetY;
+    },
+
+    createBom(type, x, y) {
+      this.combineMusic.play();
+      const radius = this.fruits[type].radius; // 半径递增
+      const bom = PIXI.Sprite.from(this.fruits[type].bom)
+      bom.x = x;
+      bom.y = y;
+      bom.width = 3*radius;
+      bom.height = 3*radius;
+      bom.anchor.set(0.5, 0.5); // 设置精灵的锚点居中
+      this.app.stage.addChild(bom);
+      
+      setTimeout(() => {
+        this.app.stage.removeChild(bom);
+        const newFruit = this.createFruit(type+1, x, y);
+        this.gameProgressChecking(newFruit);
+      }, 100)
     },
 
     /**
