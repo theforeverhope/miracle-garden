@@ -113,6 +113,29 @@ export default {
     },
 
     /**
+     * 绘制背景
+     * @param {*} app - PIXI.Application
+     */
+    setBackground(app) {
+      app.renderer.backgroundColor = 0xfee48c; // 设置canvas背景颜色
+
+      const groundHeight = 80;
+      let ground = new PIXI.Graphics();
+      ground.beginFill(0x67422b);
+      ground.drawRect(0, window.innerHeight - groundHeight, window.innerWidth, groundHeight);
+      ground.endFill();
+      app.stage.addChild(ground);
+
+      const platformHeight = 20;
+      let platform = new PIXI.Graphics();
+      platform.beginFill(0xa67840);
+      platform.drawRect(0, window.innerHeight - platformHeight - groundHeight, window.innerWidth, platformHeight);
+      platform.endFill();
+      platform.type = -1;
+      app.stage.addChild(platform);
+    },
+
+    /**
      * 清除上一局面板上的所有棋子
      */
     clearGame() {
