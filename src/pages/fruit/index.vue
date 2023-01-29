@@ -42,8 +42,8 @@ export default {
       status: -1, // 游戏状态 -1: 进行中, 0: 失败, 1: 胜利
       curFruit: null, // 当前可交互的水果
       groundHeight: 100, // 地面高度
-      psdWidth: 750, // 标准屏幕宽度
-      canvasHeight: window.innerHeight * 750 / window.innerWidth, // 用标准屏幕宽度换算canvas高度
+      psdWidth: window.innerWidth, // 标准屏幕宽度
+      canvasHeight: window.innerHeight, // 用标准屏幕宽度换算canvas高度
       
       collideMusic: new Audio(require('../../assets/watermelon/collide.mp3')),
       combineMusic: new Audio(require('../../assets/watermelon/combine.mp3')),
