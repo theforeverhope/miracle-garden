@@ -14,6 +14,7 @@
 </template>
 
 <script>
+import { toRaw } from '@vue/reactivity';
 import * as PIXI from 'pixi.js';
 import * as Matter from 'matter-js';
 import { random, uuid } from '../../../utils/common';
@@ -34,7 +35,7 @@ export default {
       particleContainer: null,
 
       count: 1000, // 1s
-      lastTime: null,
+      lastTime: Date.now(),
       
       fruitsOnScreen: [],
 
@@ -139,8 +140,9 @@ export default {
      */
     gameLoop() {
       // 更新列表中每个水果的位置
-      for(let i = 0; i < this.fruitsOnScreen.length; i++) {
-        let fruit = this.fruitsOnScreen[i];
+      const fruitsOnScreen = toRaw(this.fruitsOnScreen);
+      for(let i = 0; i < fruitsOnScreen.length; i++) {
+        let fruit = fruitsOnScreen[i];
         fruit.pixiSprite.x = fruit.position.x;
         fruit.pixiSprite.y = fruit.position.y;
       }
@@ -153,7 +155,7 @@ export default {
       let diff = now - this.lastTime;
       this.lastTime = now;
       // 物理引擎更新时间状态
-      Matter.Runner.tick(this.runner, this.engine, diff);
+      Matter.Runner.tick(toRaw(this.runner), toRaw(this.engine), diff);
 
       window.requestAnimationFrame(this.gameLoop);
     },
@@ -182,11 +184,11 @@ export default {
         1500,
         { alpha: true, scale: true, rotation: true, uvs: true }
       );
-      this.app.stage.addChild(this.particleContainer);
+      this.app.stage.addChild(toRaw(this.particleContainer));
 
       // 初始化物理系统
       this.engine = Matter.Engine.create({});
-      this.world = this.engine.world;
+      this.world = toRaw(this.engine).world;
       this.world.bounds = { min: { x: 0, y: 0 }, max: { x: this.psdWidth, y: this.canvasHeight } };
       this.runner = Matter.Runner.create();
       // this.render = Matter.Render.create({
@@ -200,8 +202,8 @@ export default {
       //     showSleeping: false,
       //   },
       // });
-      this.mouseconstraint = Matter.MouseConstraint.create(this.engine);
-      Matter.Engine.run(this.engine);
+      this.mouseconstraint = Matter.MouseConstraint.create(toRaw(this.engine));
+      Matter.Engine.run(toRaw(this.engine));
 
       this.resetGame();
     },
@@ -249,7 +251,7 @@ export default {
       );
       const leftWall = Matter.Bodies.rectangle(-10/2, this.canvasHeight/2, 10, this.canvasHeight, { isStatic: true });
       const rightWall = Matter.Bodies.rectangle(10/2 + this.psdWidth, this.canvasHeight/2, 10, this.canvasHeight, { isStatic: true });
-      Matter.World.add(this.world, [ground, leftWall, rightWall]);
+      Matter.World.add(toRaw(this.world), [ground, leftWall, rightWall]);
       // Matter.Render.run(this.render); // 用 requestAnimationFrame 实现了 run 的效果
 
       // 设置事件监听
@@ -263,30 +265,30 @@ export default {
      * 游戏世界监听
      */
     setEventListener() {
-      Matter.Events.on(this.mouseconstraint, "mousemove", (e)=>{
+      Matter.Events.on(toRaw(this.mouseconstraint), "mousemove", (e)=>{
         if(!this.curFruit || this.status !== -1) return;
         const x = e.mouse.absolute.x * this.psdWidth / window.innerWidth;
         this.updateFruit(x);
       })
 
-      Matter.Events.on(this.mouseconstraint, "mouseup", (e)=>{
+      Matter.Events.on(toRaw(this.mouseconstraint), "mouseup", (e)=>{
         if (this.status !== -1) {
           this.resetGame();
           return;
         }
-        if(!this.curFruit) {
+        if(!toRaw(this.curFruit)) {
           return;
         };
         const x = e.mouse.absolute.x * this.psdWidth / window.innerWidth;
         this.updateFruit(x);
-        Matter.Body.setStatic(this.curFruit, false);
+        Matter.Body.setStatic(toRaw(this.curFruit), false);
         this.curFruit = null;
         setTimeout(()=>{
           this.curFruit = this.createFruit();
         }, 1000);
       });
 
-      Matter.Events.on(this.engine, "collisionStart", e => this.collisionEvent(e));
+      Matter.Events.on(toRaw(this.engine), "collisionStart", e => this.collisionEvent(e));
     },
 
     /**
@@ -354,10 +356,10 @@ export default {
      * 水果下落前可水平移动位置
      */
     updateFruit(x) {
-      const radius = this.curFruit.circleRadius;
+      const radius = toRaw(this.curFruit).circleRadius;
       const targetX = x < radius ? radius : (x + radius > this.psdWidth ? (this.psdWidth - radius) : x);
       const targetY = radius + 10;
-      Matter.Body.setPosition(this.curFruit, {
+      Matter.Body.setPosition(toRaw(this.curFruit), {
         x: targetX, 
         y: targetY
       });
@@ -416,7 +418,7 @@ export default {
 
       fruit.fruitId = uuid(); // 当前水果ID，用于合并后销毁水果的判断
       fruit.fruitType = fruitNum; // 水果类型
-      Matter.World.add(this.world, fruit);
+      Matter.World.add(toRaw(this.world), fruit);
 
       this.fruitsOnScreen.push(fruit);
       return fruit;
@@ -444,9 +446,9 @@ export default {
       });
       this.fruitsOnScreen = [];
       // 由于还要重新设置游戏面板，所以engine不需要清除
-      this.world && Matter.World.clear(this.world);
-      this.render && Matter.Render.stop(this.render);
-      this.mouseconstraint && Matter.Events.off(this.mouseconstraint)
+      this.world && Matter.World.clear(toRaw(this.world));
+      this.render && Matter.Render.stop(toRaw(this.render));
+      this.mouseconstraint && Matter.Events.off(toRaw(this.mouseconstraint))
     },
   }
 }
