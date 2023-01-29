@@ -382,7 +382,7 @@ export default {
         this.app.stage.removeChild(bom);
         const newFruit = this.createFruit(type+1, x, y);
         this.gameProgressChecking(newFruit);
-      }, 100)
+      }, 200)
     },
 
     /**
