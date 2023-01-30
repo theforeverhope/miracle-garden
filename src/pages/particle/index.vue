@@ -6,6 +6,10 @@
 
 <script>
 import Star from '../../particle/star';
+import Facula from '../../particle/facula';
+
+let begin = new Date().valueOf();
+let facula = null;
 
 let stars = [];
 let ctx = null;
@@ -18,7 +22,7 @@ export default {
     return {
       WIDTH: window.innerWidth,
       HEIGHT: window.innerHeight,
-      num: 10
+      num: 2
     };
   },
 
@@ -27,6 +31,7 @@ export default {
     canvas.setAttribute("height", this.HEIGHT);
     canvas.setAttribute("width", this.WIDTH);
     ctx = canvas.getContext("2d");
+
     this.gameLoop();
   },
 
@@ -34,7 +39,8 @@ export default {
     gameLoop() {
       ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
       
-      this.drawStars();
+      // this.drawStars();
+      this.drawFacula();
       
       window.requestAnimationFrame(this.gameLoop);
     },
@@ -59,6 +65,23 @@ export default {
       stars.forEach(star => {
         star.draw(ctx)
       })
+    },
+
+    /**
+     * 绘制光斑粒子
+     */
+    drawFacula() {
+      if (new Date().valueOf() - begin < 100) { // 间隔一定时间再绘制，控制光斑密度
+        return;
+      }
+
+      if (!facula) {
+        facula = new Facula(this.WIDTH/2, this.HEIGHT/2, this.num)
+      }
+      facula.createBall(this.WIDTH/2, this.HEIGHT/2, this.num);
+      begin = new Date().valueOf();
+      facula.draw(ctx); // 循环绘制移动后的光斑
+      facula.remove(); // 移除超过生命周期的光斑
     }
   }
 }
