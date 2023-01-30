@@ -13,6 +13,10 @@ const routers = [
     path: '/fruit',
     component: () => import('./pages/fruit/index')
   },
+  {
+    path: '/particle',
+    component: () => import('./pages/particle/index')
+  },
   // {
   //   path: '/watermelon',
   //   component: () => import('./pages/watermelon/index')
