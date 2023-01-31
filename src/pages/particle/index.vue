@@ -39,8 +39,14 @@ export default {
     gameLoop() {
       ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
       
-      // this.drawStars();
-      this.drawFacula();
+      switch (this.$route?.query?.id) {
+        case 'star':
+          this.drawStars();
+          break;
+        case 'facula': 
+          this.drawFacula();
+          break;
+      }
       
       window.requestAnimationFrame(this.gameLoop);
     },
