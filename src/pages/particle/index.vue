@@ -31,19 +31,21 @@ export default {
     canvas.setAttribute("height", this.HEIGHT);
     canvas.setAttribute("width", this.WIDTH);
     ctx = canvas.getContext("2d");
-
+    console.log('this.$route?.query?.id=', this.$route, this.$route?.query?.id)
     this.gameLoop();
   },
 
   methods: {
     gameLoop() {
       ctx.clearRect(0, 0, this.WIDTH, this.HEIGHT);
-      
+
       switch (this.$route?.query?.id) {
         case 'star':
+          console.log('star=', this.$route?.query?.id)
           this.drawStars();
           break;
         case 'facula': 
+          console.log('facula=', this.$route?.query?.id)
           this.drawFacula();
           break;
       }
