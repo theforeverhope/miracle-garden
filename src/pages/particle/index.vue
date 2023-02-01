@@ -31,7 +31,7 @@ export default {
     canvas.setAttribute("height", this.HEIGHT);
     canvas.setAttribute("width", this.WIDTH);
     ctx = canvas.getContext("2d");
-    console.log('this.$route?.query?.id=', this.$route, this.$route?.query?.id)
+    console.log('this.$route?.query?.id=', this.$route)
     this.gameLoop();
   },
 
