@@ -22,7 +22,8 @@ export default {
     return {
       WIDTH: window.innerWidth,
       HEIGHT: window.innerHeight,
-      num: 2
+      starNum: 10,
+      faculaNum: 2,
     };
   },
 
@@ -31,7 +32,7 @@ export default {
     canvas.setAttribute("height", this.HEIGHT);
     canvas.setAttribute("width", this.WIDTH);
     ctx = canvas.getContext("2d");
-    console.log('this.$route?.query?.id=', this.$route)
+
     this.gameLoop();
   },
 
@@ -41,11 +42,9 @@ export default {
 
       switch (this.$route?.query?.id) {
         case 'star':
-          console.log('star=', this.$route?.query?.id)
           this.drawStars();
           break;
         case 'facula': 
-          console.log('facula=', this.$route?.query?.id)
           this.drawFacula();
           break;
       }
@@ -62,8 +61,8 @@ export default {
       // 筛选出生命周期还没结束的星星
       stars = stars.filter(star => star.alive());
       // 补充星星数量，如果数量不足num
-      if (stars.length < this.num) {
-        for (let i = 0; i < this.num - len; i++) {
+      if (stars.length < this.starNum) {
+        for (let i = 0; i < this.starNum - len; i++) {
           const x = Math.floor(Math.random() * this.WIDTH);
           const y = Math.floor(Math.random() * this.HEIGHT);
           stars.push(new Star(x, y))
@@ -84,9 +83,9 @@ export default {
       }
 
       if (!facula) {
-        facula = new Facula(this.WIDTH/2, this.HEIGHT/2, this.num)
+        facula = new Facula(this.WIDTH/2, this.HEIGHT/2, this.faculaNum)
       }
-      facula.createBall(this.WIDTH/2, this.HEIGHT/2, this.num);
+      facula.createBall(this.WIDTH/2, this.HEIGHT/2, this.faculaNum);
       begin = new Date().valueOf();
       facula.draw(ctx); // 循环绘制移动后的光斑
       facula.remove(); // 移除超过生命周期的光斑
