@@ -10,6 +10,23 @@ export function random(min, max, times = 1) {
 }
 
 /**
+ * 角度值转弧度值
+ * @param {*} n 角度值
+ * @returns 
+ */
+export function degreeToRadian(n) {
+  return n * Math.PI / 180;
+}
+
+/**
+ * 生成随机颜色
+ * @returns 
+ */
+export function randomColor() {
+  return "#"+parseInt(Math.random()*(16777216)).toString(16);
+}
+
+/**
  * 生成随机ID
  */
 export function uuid() {

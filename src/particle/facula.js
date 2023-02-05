@@ -1,28 +1,21 @@
-class Ball {
+import { random, degreeToRadian, randomColor, uuid } from '../../utils/common';
+import Easing from '../time/bezier';
+export default class Facula {
   //初始状态的光斑小球
   constructor(x, y, r=10) {
+    this.id = uuid();
     this.x = x;
     this.y = y;
-    this.r = r;
-    this.direction = false;
-    this.time = new Date().valueOf();
-    this.maxTime = 4500; // 光斑的最大生命时长
+    this.r = r || random(10, 15);
+    this.birth = Date.now();
+    this.process = 0; // 光斑运动时长，相对于最大生命值的时长
+    this.duration = 100000; // 光斑的最大生命时长
+    this.distance = 5; // 单位位移
     this.opacity = 0.5;
-    this.color = this.randomColor();
-    this.angle = Math.random()*(Math.PI*2); // 光点与坐标轴形成的夹角，用三角函数换算x,y坐标
-    // this.anglex = this.randomR(10,15)*Math.cos(this.angle); // 随机单位距离
-    // this.angley = this.randomR(10,15)*Math.sin(this.angle);
-    this.anglex = 5*Math.cos(this.angle); // 固定单位距离
-    this.angley = 5*Math.sin(this.angle);
-  }
-
-  //随机颜色
-  randomColor() {
-    return "#"+parseInt(Math.random()*(16777216)).toString(16);
-  }
-  //随机数字 可控制半径或xy移动量
-  randomR(min, max) {
-    return Math.random() * max + min;
+    this.color = randomColor();
+    this.angle = degreeToRadian(random(0, 360)); // 光点与坐标轴形成的夹角，用三角函数换算x,y坐标
+    this.animation = Easing.easeOut;
+    this.direction = false;
   }
 
   flash() {
@@ -31,7 +24,7 @@ class Ball {
       this.direction = true;
     } 
     
-    if (this.opacity >= 0.3) {
+    if (this.opacity >= 0.8) {
       this.direction = false;
     }
 
@@ -47,63 +40,37 @@ class Ball {
 
   //小球的运动及偏移量
   move() {
-    this.x += this.anglex;
-    this.y += this.angley;
-    this.anglex *= 1; // 缓动因子，>1则加速运动，<1则减速运动
-    this.angley *= 1;
+    // 当前进度百分比，先根据时间算出线性的结果，然后用easing求得缓动效果对应的时间
+    let diff = Date.now() - this.birth;
+    let percent = this.process / this.duration;
+    percent = this.animation(percent);
+     
+    this.x += this.distance * Math.cos(this.angle) * percent;
+    this.y += this.distance * Math.sin(this.angle) * percent;
+    this.process += diff;
     this.flash();
-  }
-}
-
-export default class Facula {
-  constructor(x, y, num) {
-    this.x = x;
-    this.y = y;
-    this.num = num;
-    this.balls = [];
-    this.createBall(x, y, num)
-  }
-
-  createBall(x, y, num){
-    for(let i=0; i < num; i++) {
-      this.balls.push(new Ball(x, y));
-    }
   }
 
   draw(ctx) {
-    for(let i=0;i < this.balls.length;i++){
-      let b = this.balls[i];
-      b.move();
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, b.r, 0, Math.PI*2, true);
-      ctx.fillStyle = b.color;
-      ctx.fill();
-      ctx.closePath();
-    }
-  }
-
-  remove() {
-    for(let i=0; i<this.balls.length; i++){
-      let b = this.balls[i];
-      let dt = new Date().valueOf() - b.time; // 生命时间 
-      if(dt > b.maxTime) { // 距离 = 时间 * 速度，速度一定，所以时间长短控制移动距离
-        this.balls.splice(i,1);
-        this.balls.push(new Ball(this.x, this.y));
-      }
-    }
+    this.move();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2, true);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.closePath();
   }
 }
 
-function drawMoon(ctx) {
-  const x = window.innerWidth / 2 - moonWidth / 2;
-  const y = window.innerHeight / 2 - moonHeight / 2;
-  ctx.drawImage(bg, x, y, moonWidth, moonHeight);
-  ctx.beginPath();
-  ctx.arc(window.innerWidth / 2, window.innerHeight / 2, moonWidth / 2 - 8, 0, Math.PI*2, true);
-  ctx.fillStyle = 'rgba(153, 204, 255, 0.3)';
-  ctx.fill();
-  ctx.closePath();
-}
+// function drawMoon(ctx) {
+//   const x = window.innerWidth / 2 - moonWidth / 2;
+//   const y = window.innerHeight / 2 - moonHeight / 2;
+//   ctx.drawImage(bg, x, y, moonWidth, moonHeight);
+//   ctx.beginPath();
+//   ctx.arc(window.innerWidth / 2, window.innerHeight / 2, moonWidth / 2 - 8, 0, Math.PI*2, true);
+//   ctx.fillStyle = 'rgba(153, 204, 255, 0.3)';
+//   ctx.fill();
+//   ctx.closePath();
+// }
 
 // const bg = new Image();
 // bg.src = "./moon.png";

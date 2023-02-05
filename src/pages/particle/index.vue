@@ -12,6 +12,7 @@ let begin = new Date().valueOf();
 let facula = null;
 
 let stars = [];
+let faculas = [];
 let ctx = null;
 
 export default {
@@ -23,7 +24,7 @@ export default {
       WIDTH: window.innerWidth,
       HEIGHT: window.innerHeight,
       starNum: 10,
-      faculaNum: 2,
+      faculaNum: 100,
     };
   },
 
@@ -78,17 +79,18 @@ export default {
      * 绘制光斑粒子
      */
     drawFacula() {
-      if (new Date().valueOf() - begin < 100) { // 间隔一定时间再绘制，控制光斑密度
-        return;
+      // 筛选出生命周期未完成的光斑
+      faculas = faculas.filter(f => f.process < f.duration);
+
+      // 光斑数量不足则补充，但每次补充一个
+      if (faculas.length < this.faculaNum) {
+        faculas.push(new Facula(this.WIDTH/2, this.HEIGHT/2))
       }
 
-      if (!facula) {
-        facula = new Facula(this.WIDTH/2, this.HEIGHT/2, this.faculaNum)
+      // 绘制光斑
+      for (let i=0; i<faculas.length; i++) {
+        faculas[i].draw(ctx);
       }
-      facula.createBall(this.WIDTH/2, this.HEIGHT/2, this.faculaNum);
-      begin = new Date().valueOf();
-      facula.draw(ctx); // 循环绘制移动后的光斑
-      facula.remove(); // 移除超过生命周期的光斑
     }
   }
 }
