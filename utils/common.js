@@ -12,7 +12,6 @@ export function random(min, max, times = 1) {
 /**
  * 角度值转弧度值
  * @param {*} n 角度值
- * @returns 
  */
 export function degreeToRadian(n) {
   return n * Math.PI / 180;
@@ -20,11 +19,26 @@ export function degreeToRadian(n) {
 
 /**
  * 生成随机颜色
- * @returns 
  */
 export function randomColor() {
-  return "#"+parseInt(Math.random()*(16777216)).toString(16);
+  return `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, 1)`;
 }
+
+/**
+ * 颜色添加透明度
+ */
+export function getColorWithOpacity(color, opacity) {
+  if (/rgba/.test(color)  || /rgb/.test(color)) {
+    let cMatch = color.match(/((?<=(rgba\())|(?<=(rgb\())).*(?=(\)))/)[0];
+    let cArr = cMatch.split(",");
+    return `rgba(${+cArr[0] || random(0, 255)}, ${+cArr[1] || random(0, 255)}, ${+cArr[2] || random(0, 255)}, ${opacity})`
+  }
+  return `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, 1)`;
+}
+
+/**
+ * 
+ */
 
 /**
  * 生成随机ID

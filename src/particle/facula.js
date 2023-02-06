@@ -1,4 +1,4 @@
-import { random, degreeToRadian, randomColor, uuid } from '../../utils/common';
+import { random, degreeToRadian, randomColor, uuid, getColorWithOpacity } from '../../utils/common';
 import Easing from '../time/bezier';
 export default class Facula {
   //初始状态的光斑小球
@@ -35,7 +35,7 @@ export default class Facula {
       this.opacity -= 0.1;
       this.r -= 0.5;
     } 
-    this.color = `rgba(255, 255, 255, ${this.opacity})`
+    this.color = getColorWithOpacity(this.color, this.opacity);
   }
 
   //小球的运动及偏移量
@@ -48,11 +48,11 @@ export default class Facula {
     this.x += this.distance * Math.cos(this.angle) * percent;
     this.y += this.distance * Math.sin(this.angle) * percent;
     this.process += diff;
-    this.flash();
   }
 
   draw(ctx) {
     this.move();
+    this.flash();
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.r, 0, Math.PI*2, true);
     ctx.fillStyle = this.color;
