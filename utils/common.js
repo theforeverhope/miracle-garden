@@ -37,10 +37,6 @@ export function getColorWithOpacity(color, opacity) {
 }
 
 /**
- * 
- */
-
-/**
  * 生成随机ID
  */
 export function uuid() {
