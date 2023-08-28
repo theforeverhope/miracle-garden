@@ -17,10 +17,10 @@ const routers = [
     path: '/particle',
     component: () => import('./pages/particle/index')
   },
-  // {
-  //   path: '/watermelon',
-  //   component: () => import('./pages/watermelon/index')
-  // },
+  {
+    path: '/car',
+    component: () => import('./pages/car/index')
+  },
 ];
 
 const router = createRouter({
