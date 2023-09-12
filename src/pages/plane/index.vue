@@ -1,6 +1,6 @@
 <template lang="html">
     <div class="iframe-wrapper">
-        <iframe class="iframe-content" src="/car/index.html" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" oallowfullscreen="true" msallowfullscreen="true" name="mapFrame" scrolling="no" frameborder="0"></iframe>
+        <iframe class="iframe-content" src="/plane/index.html" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" oallowfullscreen="true" msallowfullscreen="true" name="mapFrame" scrolling="no" frameborder="0"></iframe>
     </div>
 </template>
 

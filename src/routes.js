@@ -21,6 +21,10 @@ const routers = [
     path: '/car',
     component: () => import('./pages/car/index')
   },
+  {
+    path: '/plane',
+    component: () => import('./pages/plane/index')
+  },
 ];
 
 const router = createRouter({
