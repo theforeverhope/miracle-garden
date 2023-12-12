@@ -25,6 +25,10 @@ const routers = [
     path: '/plane',
     component: () => import('./pages/plane/index')
   },
+  {
+    path: '/city',
+    component: () => import('./pages/city/index')
+  },
 ];
 
 const router = createRouter({
